@@ -7,6 +7,8 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -26,6 +28,13 @@ public class SinespClient {
   // Reference: https://github.com/victor-torres/sinesp-client
   private static final String SECRET = "TRwf1iBwvCoSboSscGne";
   private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+  private static final Map<String, String> headers;
+
+  static {
+    headers = new HashMap<>();
+    headers.put("User-Agent", "SinespCidadao / 3.0.2.1 CFNetwork / 758.2.8 Darwin / 15.0.0");
+    headers.put("Host", "sinespcidadao.sinesp.gov.br");
+  }
 
   private final String baseTemplate;
 
@@ -61,7 +70,9 @@ public class SinespClient {
     content = generateBody(plate);
 
     try {
-      connection = Jsoup.connect("http://sinespcidadao.sinesp.gov.br/sinesp-cidadao/mobile/consultar-placa")
+      connection = Jsoup.connect("https://sinespcidadao.sinesp.gov.br/sinesp-cidadao/mobile/consultar-placa")
+              .validateTLSCertificates(false)
+              .headers(headers)
               .requestBody(content)
               .method(Method.POST);
       xml = Jsoup.parse(connection.execute().body(), "", Parser.xmlParser());
@@ -186,5 +197,9 @@ public class SinespClient {
 
     result = client.search("ABC1234");
     System.out.println(result.getModel());
+    System.out.println(result.getYear());
+    System.out.println(result.getModelYear());
+    System.out.println(result.getReturnMessage());
+    System.out.println(result.getStatusMessage());
   }
 }
