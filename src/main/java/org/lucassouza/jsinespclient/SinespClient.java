@@ -25,8 +25,12 @@ import org.jsoup.parser.Parser;
  */
 public class SinespClient {
 
-  // Reference: https://github.com/victor-torres/sinesp-client
-  private static final String SECRET = "TRwf1iBwvCoSboSscGne";
+  // References:
+  // - https://github.com/victor-torres/sinesp-client
+  // - https://github.com/chapeupreto/sinesp
+
+  private static final String URL = "https://sinespcidadao.sinesp.gov.br/sinesp-cidadao/mobile/consultar-placa/v2";
+  private static final String SECRET = "XvAmRTGhQchFwzwduKYK";
   private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
   private static final Map<String, String> headers;
 
@@ -70,7 +74,7 @@ public class SinespClient {
     content = generateBody(plate);
 
     try {
-      connection = Jsoup.connect("https://sinespcidadao.sinesp.gov.br/sinesp-cidadao/mobile/consultar-placa")
+      connection = Jsoup.connect(URL)
               .validateTLSCertificates(false)
               .headers(headers)
               .requestBody(content)
@@ -195,6 +199,15 @@ public class SinespClient {
     SinespClient client = new SinespClient();
     Result result;
 
+    result = client.search("BPG0795");
+    System.out.println(result.getModel());
+    System.out.println(result.getYear());
+    System.out.println(result.getModelYear());
+    System.out.println(result.getReturnMessage());
+    System.out.println(result.getStatusMessage());
+    
+    System.out.println("----------------");
+    
     result = client.search("ABC1234");
     System.out.println(result.getModel());
     System.out.println(result.getYear());
