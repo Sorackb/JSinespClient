@@ -32,12 +32,17 @@ public class SinespClient {
   private static final String URL = "https://sinespcidadao.sinesp.gov.br/sinesp-cidadao/mobile/consultar-placa/v2";
   private static final String SECRET = "XvAmRTGhQchFwzwduKYK";
   private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-  private static final Map<String, String> headers;
+  private static final Map<String, String> HEADERS;
+  private static final SinespClient CLIENT;
+  
+  static {
+    CLIENT = new SinespClient();
+  }
 
   static {
-    headers = new HashMap<>();
-    headers.put("User-Agent", "SinespCidadao / 3.0.2.1 CFNetwork / 758.2.8 Darwin / 15.0.0");
-    headers.put("Host", "sinespcidadao.sinesp.gov.br");
+    HEADERS = new HashMap<>();
+    HEADERS.put("User-Agent", "SinespCidadao / 3.0.2.1 CFNetwork / 758.2.8 Darwin / 15.0.0");
+    HEADERS.put("Host", "sinespcidadao.sinesp.gov.br");
   }
 
   private final String baseTemplate;
@@ -62,8 +67,8 @@ public class SinespClient {
     return content;
   }
 
-  public Result search(String plate) {
-    return this.request(plate);
+  public static Result search(String plate) {
+    return CLIENT.request(plate);
   }
 
   private Result request(String plate) {
@@ -76,7 +81,7 @@ public class SinespClient {
     try {
       connection = Jsoup.connect(URL)
               .validateTLSCertificates(false)
-              .headers(headers)
+              .headers(HEADERS)
               .requestBody(content)
               .method(Method.POST);
       xml = Jsoup.parse(connection.execute().body(), "", Parser.xmlParser());
@@ -196,10 +201,9 @@ public class SinespClient {
   }
 
   public static void main(String[] args) {
-    SinespClient client = new SinespClient();
     Result result;
 
-    result = client.search("BPG0795");
+    result = SinespClient.search("BPG0795");
     System.out.println(result.getModel());
     System.out.println(result.getYear());
     System.out.println(result.getModelYear());
@@ -208,7 +212,7 @@ public class SinespClient {
     
     System.out.println("----------------");
     
-    result = client.search("ABC1234");
+    result = SinespClient.search("ABC1234");
     System.out.println(result.getModel());
     System.out.println(result.getYear());
     System.out.println(result.getModelYear());
