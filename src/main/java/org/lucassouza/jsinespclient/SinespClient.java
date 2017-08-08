@@ -199,24 +199,4 @@ public class SinespClient {
 
     return result;
   }
-
-  public static void main(String[] args) {
-    Result result;
-
-    result = SinespClient.search("BPG0795");
-    System.out.println(result.getModel());
-    System.out.println(result.getYear());
-    System.out.println(result.getModelYear());
-    System.out.println(result.getReturnMessage());
-    System.out.println(result.getStatusMessage());
-    
-    System.out.println("----------------");
-    
-    result = SinespClient.search("ABC1234");
-    System.out.println(result.getModel());
-    System.out.println(result.getYear());
-    System.out.println(result.getModelYear());
-    System.out.println(result.getReturnMessage());
-    System.out.println(result.getStatusMessage());
-  }
 }

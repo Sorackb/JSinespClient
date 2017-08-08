@@ -1,5 +1,8 @@
 package org.lucassouza.jsinespclient;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 /**
  *
  * @author Lucas Souza [sorack@gmail.com]
@@ -132,5 +135,10 @@ public class Result {
   public void setVinCode(String vinCode) {
     this.vinCode = vinCode;
   }
-  
+
+  public String toJSON() {
+    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+    return gson.toJson(this);
+  }
 }
