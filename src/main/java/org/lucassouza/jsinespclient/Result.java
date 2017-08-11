@@ -9,26 +9,26 @@ import com.google.gson.GsonBuilder;
  */
 public class Result {
 
-  private int returnCode;
+  private Integer returnCode;
   private String returnMessage;
-  private int statusCode;
+  private Integer statusCode;
   private String statusMessage;
   private String model;
   private String brand;
   private String color;
-  private int year;
-  private int modelYear;
+  private Integer year;
+  private Integer modelYear;
   private String plate;
   private String date;
   private String state;
   private String city;
   private String vinCode;
 
-  public int getReturnCode() {
+  public Integer getReturnCode() {
     return returnCode;
   }
 
-  public void setReturnCode(int returnCode) {
+  public void setReturnCode(Integer returnCode) {
     this.returnCode = returnCode;
   }
 
@@ -40,11 +40,11 @@ public class Result {
     this.returnMessage = returnMessage;
   }
 
-  public int getStatusCode() {
+  public Integer getStatusCode() {
     return statusCode;
   }
 
-  public void setStatusCode(int statusCode) {
+  public void setStatusCode(Integer statusCode) {
     this.statusCode = statusCode;
   }
 
@@ -80,19 +80,19 @@ public class Result {
     this.color = color;
   }
 
-  public int getYear() {
+  public Integer getYear() {
     return year;
   }
 
-  public void setYear(int year) {
+  public void setYear(Integer year) {
     this.year = year;
   }
 
-  public int getModelYear() {
+  public Integer getModelYear() {
     return modelYear;
   }
 
-  public void setModelYear(int modelYear) {
+  public void setModelYear(Integer modelYear) {
     this.modelYear = modelYear;
   }
 

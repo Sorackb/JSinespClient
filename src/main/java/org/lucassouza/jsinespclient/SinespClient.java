@@ -1,8 +1,6 @@
 package org.lucassouza.jsinespclient;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
@@ -25,16 +23,12 @@ import org.jsoup.parser.Parser;
  */
 public class SinespClient {
 
-  // References:
-  // - https://github.com/victor-torres/sinesp-client
-  // - https://github.com/chapeupreto/sinesp
-
   private static final String URL = "https://sinespcidadao.sinesp.gov.br/sinesp-cidadao/mobile/consultar-placa/v2";
   private static final String SECRET = "XvAmRTGhQchFwzwduKYK";
   private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
   private static final Map<String, String> HEADERS;
   private static final SinespClient CLIENT;
-  
+
   static {
     CLIENT = new SinespClient();
   }
@@ -43,28 +37,6 @@ public class SinespClient {
     HEADERS = new HashMap<>();
     HEADERS.put("User-Agent", "SinespCidadao / 3.0.2.1 CFNetwork / 758.2.8 Darwin / 15.0.0");
     HEADERS.put("Host", "sinespcidadao.sinesp.gov.br");
-  }
-
-  private final String baseTemplate;
-
-  public SinespClient() {
-    this.baseTemplate = this.readTemplate();
-  }
-
-  private String readTemplate() {
-    ClassLoader classLoader;
-    File file;
-    String content = null;
-
-    try {
-      classLoader = getClass().getClassLoader();
-      file = new File(classLoader.getResource("file/body.xml").getFile());
-      content = new String(Files.readAllBytes(file.toPath()));
-    } catch (IOException exception) {
-      throw new RuntimeException(exception);
-    }
-
-    return content;
   }
 
   public static Result search(String plate) {
@@ -93,28 +65,16 @@ public class SinespClient {
   }
 
   private String generateBody(String plate) {
-    String token;
-    double latitude;
-    double longitude;
-    String uuid;
-    String date;
-    String content;
+    Request request = new Request();
 
-    token = this.generateToken(plate);
-    latitude = this.generateLatitude();
-    longitude = this.generateLongitude();
-    // RFC 4122 Class 4 random UUID
-    uuid = UUID.randomUUID().toString();
-    date = this.generateDate();
-    content = this.baseTemplate
-            .replace("{LATITUDE}", String.valueOf(latitude))
-            .replace("{TOKEN}", token)
-            .replace("{UUID}", uuid)
-            .replace("{LONGITUDE}", String.valueOf(longitude))
-            .replace("{DATE}", date)
-            .replace("{PLATE}", plate);
+    request.setToken(this.generateToken(plate));
+    request.setLatitude(this.generateLatitude());
+    request.setLongitude(this.generateLongitude());
+    request.setUuid(UUID.randomUUID().toString()); // RFC 4122 Class 4 random UUID    
+    request.setDate(this.generateDate());
+    request.setPlate(plate);
 
-    return content;
+    return request.toXML();
   }
 
   /**
@@ -184,18 +144,21 @@ public class SinespClient {
 
     result.setReturnCode(Integer.parseInt(xml.select("return > codigoRetorno").first().text()));
     result.setReturnMessage(xml.select("return > mensagemRetorno").first().text());
-    result.setStatusCode(Integer.parseInt(xml.select("return > codigoSituacao").first().text()));
-    result.setStatusMessage(xml.select("return > situacao").first().text());
-    result.setModel(xml.select("return > modelo").first().text());
-    result.setBrand(xml.select("return > marca").first().text());
-    result.setColor(xml.select("return > cor").first().text());
-    result.setYear(Integer.parseInt(xml.select("return > ano").first().text()));
-    result.setModelYear(Integer.parseInt(xml.select("return > anoModelo").first().text()));
-    result.setPlate(xml.select("return > placa").first().text());
-    result.setDate(xml.select("return > data").first().text());
-    result.setState(xml.select("return > uf").first().text());
-    result.setCity(xml.select("return > municipio").first().text());
-    result.setVinCode(xml.select("return > chassi").first().text());
+
+    if (0 == result.getReturnCode()) {
+      result.setStatusCode(Integer.parseInt(xml.select("return > codigoSituacao").first().text()));
+      result.setStatusMessage(xml.select("return > situacao").first().text());
+      result.setModel(xml.select("return > modelo").first().text());
+      result.setBrand(xml.select("return > marca").first().text());
+      result.setColor(xml.select("return > cor").first().text());
+      result.setYear(Integer.parseInt(xml.select("return > ano").first().text()));
+      result.setModelYear(Integer.parseInt(xml.select("return > anoModelo").first().text()));
+      result.setPlate(xml.select("return > placa").first().text());
+      result.setDate(xml.select("return > data").first().text());
+      result.setState(xml.select("return > uf").first().text());
+      result.setCity(xml.select("return > municipio").first().text());
+      result.setVinCode(xml.select("return > chassi").first().text());
+    }
 
     return result;
   }
