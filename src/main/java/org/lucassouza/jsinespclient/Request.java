@@ -14,6 +14,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPHeader;
+import javax.xml.soap.SOAPHeaderElement;
 import javax.xml.soap.SOAPMessage;
 import org.w3c.dom.Document;
 
@@ -168,6 +169,9 @@ public class Request {
       marshaller.marshal(this, document);
       soapMessage = MessageFactory.newInstance().createMessage();
       soapMessage.getSOAPBody().addDocument(document);
+      soapMessage.getSOAPPart().getEnvelope().setPrefix("v");
+      soapMessage.getSOAPBody().setPrefix("v");
+      soapMessage.getSOAPHeader().setPrefix("v");
       this.fillHeaders(soapMessage.getSOAPHeader());
       outputStream = new ByteArrayOutputStream();
       soapMessage.writeTo(outputStream);
@@ -180,7 +184,8 @@ public class Request {
   }
 
   private void fillHeaders(SOAPHeader soapHeader) throws SOAPException {
-    soapHeader.addHeaderElement(new QName(soapHeader.getNamespaceURI(), "b")).setValue(this.device);
+    this.fillHeaderElement(soapHeader.addHeaderElement(new QName(soapHeader.getNamespaceURI(), "b")), this.device);
+    //soapHeader.addHeaderElement(new QName(soapHeader.getNamespaceURI(), "b")).setValue(this.device);
     soapHeader.addHeaderElement(new QName(soapHeader.getNamespaceURI(), "c")).setValue(this.operationalSystem);
     soapHeader.addHeaderElement(new QName(soapHeader.getNamespaceURI(), "d")).setValue(this.majorVersion);
     soapHeader.addHeaderElement(new QName(soapHeader.getNamespaceURI(), "e")).setValue(this.minorVersion);
@@ -192,5 +197,11 @@ public class Request {
     soapHeader.addHeaderElement(new QName(soapHeader.getNamespaceURI(), "k")).setValue(this.uuid);
     soapHeader.addHeaderElement(new QName(soapHeader.getNamespaceURI(), "l")).setValue(this.date);
     soapHeader.addHeaderElement(new QName(soapHeader.getNamespaceURI(), "m")).setValue(this.hash);
+  }
+  
+  private void fillHeaderElement(SOAPHeaderElement element, String value) {
+    element.setValue(value);
+    element.removeAttribute("xmlns");
+    element.removeNamespaceDeclaration("v");
   }
 }

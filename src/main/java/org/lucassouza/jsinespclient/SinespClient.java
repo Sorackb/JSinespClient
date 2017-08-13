@@ -8,6 +8,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Pattern;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.codec.binary.Hex;
@@ -23,6 +24,8 @@ import org.jsoup.parser.Parser;
  */
 public class SinespClient {
 
+  private static final Pattern PLATE_FORMAT = Pattern.compile("^[a-zA-Z]{3}[0-9]{4}$");
+  private static final String SPECIAL = "[^a-zA-Z\\d]";
   private static final String URL = "https://sinespcidadao.sinesp.gov.br/sinesp-cidadao/mobile/consultar-placa/v2";
   private static final String SECRET = "XvAmRTGhQchFwzwduKYK";
   private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -40,6 +43,10 @@ public class SinespClient {
   }
 
   public static Result search(String plate) {
+    if (!validate(plate)) {
+      throw new RuntimeException("Formato de placa inválido! Utilize o formato \"AAA999\" ou \"AAA-9999\".");
+    }
+
     return CLIENT.request(plate);
   }
 
@@ -61,17 +68,23 @@ public class SinespClient {
       throw new RuntimeException(exception);
     }
 
-    return this.parseResult(xml);
+    return parseResult(xml);
   }
 
-  private String generateBody(String plate) {
+  private static Boolean validate(String plate) {
+    plate = plate.replaceAll(SPECIAL, "");
+
+    return PLATE_FORMAT.matcher(plate).find();
+  }
+
+  private static String generateBody(String plate) {
     Request request = new Request();
 
-    request.setToken(this.generateToken(plate));
-    request.setLatitude(this.generateLatitude());
-    request.setLongitude(this.generateLongitude());
+    request.setToken(generateToken(plate));
+    request.setLatitude(generateLatitude());
+    request.setLongitude(generateLongitude());
     request.setUuid(UUID.randomUUID().toString()); // RFC 4122 Class 4 random UUID    
-    request.setDate(this.generateDate());
+    request.setDate(generateDate());
     request.setPlate(plate);
 
     return request.toXML();
@@ -83,11 +96,11 @@ public class SinespClient {
    * @param plate
    * @return token based on plate
    */
-  private String generateToken(String plate) {
+  private static String generateToken(String plate) {
     return sha1Hex(plate + SECRET, plate);
   }
 
-  private String sha1Hex(String secret, String input) {
+  private static String sha1Hex(String secret, String input) {
     String check = null;
 
     try {
@@ -108,7 +121,7 @@ public class SinespClient {
    *
    * @return random seed
    */
-  private double generateCoordinate() {
+  private static double generateCoordinate() {
     double seed;
 
     seed = 2000 / Math.sqrt(Math.random());
@@ -122,8 +135,8 @@ public class SinespClient {
    *
    * @return random latitude
    */
-  private double generateLatitude() {
-    return this.generateCoordinate() - 38.5290245;
+  private static double generateLatitude() {
+    return generateCoordinate() - 38.5290245;
   }
 
   /**
@@ -131,15 +144,15 @@ public class SinespClient {
    *
    * @return random longitude
    */
-  private double generateLongitude() {
-    return this.generateCoordinate() - 3.7506985;
+  private static double generateLongitude() {
+    return generateCoordinate() - 3.7506985;
   }
 
-  private String generateDate() {
+  private static String generateDate() {
     return LocalDateTime.now().format(DATE_FORMAT);
   }
 
-  private Result parseResult(Document xml) {
+  private static Result parseResult(Document xml) {
     Result result = new Result();
 
     result.setReturnCode(Integer.parseInt(xml.select("return > codigoRetorno").first().text()));
