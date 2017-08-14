@@ -2,6 +2,7 @@ package org.lucassouza.jsinespclient;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Iterator;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -12,9 +13,10 @@ import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.MessageFactory;
+import javax.xml.soap.SOAPBody;
+import javax.xml.soap.SOAPEnvelope;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPHeader;
-import javax.xml.soap.SOAPHeaderElement;
 import javax.xml.soap.SOAPMessage;
 import org.w3c.dom.Document;
 
@@ -24,6 +26,8 @@ import org.w3c.dom.Document;
  */
 @XmlRootElement(name = "getStatus", namespace = "http://soap.ws.placa.service.sinesp.serpro.gov.br/")
 public class Request {
+  
+  private final String prefix = "v";
 
   private String plate;
 
@@ -168,11 +172,9 @@ public class Request {
       marshaller = JAXBContext.newInstance(Request.class).createMarshaller();
       marshaller.marshal(this, document);
       soapMessage = MessageFactory.newInstance().createMessage();
-      soapMessage.getSOAPBody().addDocument(document);
-      soapMessage.getSOAPPart().getEnvelope().setPrefix("v");
-      soapMessage.getSOAPBody().setPrefix("v");
-      soapMessage.getSOAPHeader().setPrefix("v");
-      this.fillHeaders(soapMessage.getSOAPHeader());
+      this.fillEnvelope(soapMessage.getSOAPPart().getEnvelope());
+      this.fillBody(soapMessage.getSOAPBody(), document);
+      this.fillHeader(soapMessage.getSOAPHeader());
       outputStream = new ByteArrayOutputStream();
       soapMessage.writeTo(outputStream);
       output = new String(outputStream.toByteArray());
@@ -183,9 +185,23 @@ public class Request {
     return output;
   }
 
-  private void fillHeaders(SOAPHeader soapHeader) throws SOAPException {
-    this.fillHeaderElement(soapHeader.addHeaderElement(new QName(soapHeader.getNamespaceURI(), "b")), this.device);
-    //soapHeader.addHeaderElement(new QName(soapHeader.getNamespaceURI(), "b")).setValue(this.device);
+  private void fillEnvelope(SOAPEnvelope envelope) {
+    Iterator prefixes;
+    envelope.setPrefix(this.prefix);
+
+    prefixes = envelope.getNamespacePrefixes();
+
+    while (prefixes.hasNext()) {
+      String currentPrefix = (String) prefixes.next();
+
+      envelope.removeNamespaceDeclaration(currentPrefix);
+    }
+  }
+
+  private void fillHeader(SOAPHeader soapHeader) throws SOAPException {
+    soapHeader.setPrefix(this.prefix);
+
+    soapHeader.addHeaderElement(new QName(soapHeader.getNamespaceURI(), "b")).setValue(this.device);
     soapHeader.addHeaderElement(new QName(soapHeader.getNamespaceURI(), "c")).setValue(this.operationalSystem);
     soapHeader.addHeaderElement(new QName(soapHeader.getNamespaceURI(), "d")).setValue(this.majorVersion);
     soapHeader.addHeaderElement(new QName(soapHeader.getNamespaceURI(), "e")).setValue(this.minorVersion);
@@ -198,10 +214,9 @@ public class Request {
     soapHeader.addHeaderElement(new QName(soapHeader.getNamespaceURI(), "l")).setValue(this.date);
     soapHeader.addHeaderElement(new QName(soapHeader.getNamespaceURI(), "m")).setValue(this.hash);
   }
-  
-  private void fillHeaderElement(SOAPHeaderElement element, String value) {
-    element.setValue(value);
-    element.removeAttribute("xmlns");
-    element.removeNamespaceDeclaration("v");
+
+  private void fillBody(SOAPBody soapBody, Document document) throws SOAPException {
+    soapBody.addDocument(document);
+    soapBody.setPrefix(this.prefix);
   }
 }
