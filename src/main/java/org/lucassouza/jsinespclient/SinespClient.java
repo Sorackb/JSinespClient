@@ -26,8 +26,8 @@ public class SinespClient {
 
   private static final Pattern PLATE_FORMAT = Pattern.compile("^[a-zA-Z]{3}[0-9]{4}$");
   private static final String SPECIAL = "[^a-zA-Z\\d]";
-  private static final String URL = "https://sinespcidadao.sinesp.gov.br/sinesp-cidadao/mobile/consultar-placa/v2";
-  private static final String SECRET = "XvAmRTGhQchFwzwduKYK";
+  private static final String URL = "https://cidadao.sinesp.gov.br/sinesp-cidadao/mobile/consultar-placa/v4";
+  private static final String SECRET = "#8.1.0#g8LzUadkEHs7mbRqbX5l";
   private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
   private static final Map<String, String> HEADERS;
   private static final SinespClient CLIENT;
@@ -39,7 +39,7 @@ public class SinespClient {
   static {
     HEADERS = new HashMap<>();
     HEADERS.put("User-Agent", "SinespCidadao / 3.0.2.1 CFNetwork / 758.2.8 Darwin / 15.0.0");
-    HEADERS.put("Host", "sinespcidadao.sinesp.gov.br");
+    HEADERS.put("Host", "cidadao.sinesp.gov.br");
   }
 
   public static Result search(String plate) {
@@ -83,7 +83,7 @@ public class SinespClient {
     request.setToken(generateToken(plate));
     request.setLatitude(generateLatitude());
     request.setLongitude(generateLongitude());
-    request.setUuid(UUID.randomUUID().toString()); // RFC 4122 Class 4 random UUID    
+    request.setUuid("");//UUID.randomUUID().toString() // RFC 4122 Class 4 random UUID    
     request.setDate(generateDate());
     request.setPlate(plate);
 

@@ -50,7 +50,7 @@
     public Request() {
       this.device = "LGE Nexus 5";
       this.operationalSystem = "ANDROID";
-      this.majorVersion = "6.0.1";
+      this.majorVersion = "8.1.0";
       this.minorVersion = "4.1.5";
       this.ip = "127.0.0.1";
       this.hash = "8797e74f0d6eb7b1ff3dc114d4aa12d3";
