@@ -25,6 +25,7 @@ import org.jsoup.parser.Parser;
 public class SinespClient {
 
   private static final Pattern PLATE_FORMAT = Pattern.compile("^[a-zA-Z]{3}[0-9]{4}$");
+  private static final Pattern PLATE_MERCOSUL_FORMAT = Pattern.compile("^[a-zA-Z]{3}[0-9]{1}[a-zA-Z]{1}[0-9]{2}$");
   private static final String SPECIAL = "[^a-zA-Z\\d]";
   private static final String URL = "https://cidadao.sinesp.gov.br/sinesp-cidadao/mobile/consultar-placa/v4";
   private static final String SECRET = "#8.1.0#g8LzUadkEHs7mbRqbX5l";
@@ -74,7 +75,7 @@ public class SinespClient {
   private static Boolean validate(String plate) {
     plate = plate.replaceAll(SPECIAL, "");
 
-    return PLATE_FORMAT.matcher(plate).find();
+    return (PLATE_FORMAT.matcher(plate).find() || PLATE_MERCOSUL_FORMAT.matcher(plate).find());
   }
 
   private static String generateBody(String plate) {
